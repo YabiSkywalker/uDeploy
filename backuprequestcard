@@ -1,0 +1,96 @@
+import * as React from "react";
+import {
+  Box,
+  Tabs,
+  Tab,
+  Card,
+  CardContent,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  Grid,
+} from "@mui/material";
+
+export default function EnvironmentSettings() {
+  const [tabIndex, setTabIndex] = React.useState(0);
+  const [zone, setZone] = React.useState("");
+  const [cluster, setCluster] = React.useState("");
+  const [envNumber, setEnvNumber] = React.useState("");
+
+  // Define clusters based on zone selection
+  const clusterOptions = {
+    NCZ: ["DEV", "IN5", "RAT", "SYS"],
+    DPZ: ["RAT", "EXT", "ORT"],
+  };
+
+  const handleTabChange = (event, newIndex) => {
+    setTabIndex(newIndex);
+  };
+
+  const handleZoneChange = (event) => {
+    setZone(event.target.value);
+    setCluster("");
+  };
+
+  return (
+    <Box sx={{ width: "100%", maxWidth: 600, mx: "auto", mt: 3 }}>
+
+      <Tabs value={tabIndex} onChange={handleTabChange} centered>
+        <Tab label="General Settings" />
+        <Tab label="Environment Variables" />
+        <Tab label="Advanced Settings" />
+      </Tabs>
+
+
+      {tabIndex === 1 && (
+        <Card sx={{ mt: 2 }}>
+          <CardContent>
+            <h2>Environment Variables</h2>
+            <Grid container spacing={2}>
+              {/* Zone Selection */}
+              <Grid item xs={12}>
+                <FormControl fullWidth>
+                  <InputLabel>Zone</InputLabel>
+                  <Select value={zone} onChange={handleZoneChange}>
+                    <MenuItem value="NCZ">NCZ</MenuItem>
+                    <MenuItem value="DPZ">DPZ</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              {/* Cluster Selection */}
+              <Grid item xs={12}>
+                <FormControl fullWidth disabled={!zone}>
+                  <InputLabel>Cluster</InputLabel>
+                  <Select value={cluster} onChange={(e) => setCluster(e.target.value)}>
+                    {zone &&
+                      clusterOptions[zone].map((clusterName) => (
+                        <MenuItem key={clusterName} value={clusterName}>
+                          {clusterName}
+                        </MenuItem>
+                      ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              {/* Environment Number Selection */}
+              <Grid item xs={12}>
+                <FormControl fullWidth>
+                  <InputLabel>Environment Number</InputLabel>
+                  <Select value={envNumber} onChange={(e) => setEnvNumber(e.target.value)}>
+                    {[...Array(101).keys()].map((num) => (
+                      <MenuItem key={num} value={num}>
+                        {num}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+            </Grid>
+          </CardContent>
+        </Card>
+      )}
+    </Box>
+  );
+}
