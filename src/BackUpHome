@@ -1,244 +1,229 @@
 import * as React from "react";
-import { extendTheme, styled } from "@mui/material/styles";
-import DashboardIcon from "@mui/icons-material/Dashboard";
-import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
-import BarChartIcon from "@mui/icons-material/BarChart";
-import DescriptionIcon from "@mui/icons-material/Description";
-import LayersIcon from "@mui/icons-material/Layers";
-import { AppProvider } from "@toolpad/core/AppProvider";
-import { DashboardLayout } from "@toolpad/core/DashboardLayout";
-import { PageContainer } from "@toolpad/core/PageContainer";
-import Grid from "@mui/material/Grid";
-import { getAllTickets } from "./authService";
-import TicketDetails from "./TicketDetails";
-import { Card, CardContent, Typography, Modal, Backdrop } from "@mui/material";
-import Paper from "@mui/material/Paper";
-import { DataGrid } from "@mui/x-data-grid";
-import ApiTwoToneIcon from '@mui/icons-material/ApiTwoTone';
-import ScienceTwoToneIcon from '@mui/icons-material/ScienceTwoTone';
-import AccountBalanceTwoToneIcon from '@mui/icons-material/AccountBalanceTwoTone';
-import MonitorHeartIcon from '@mui/icons-material/MonitorHeart';
-import DeviceHubIcon from '@mui/icons-material/DeviceHub';
-import LockIcon from '@mui/icons-material/Lock';
+import {
+  Card,
+  CardContent,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  Grid,
+  TextField,
+  Button,
+  Tabs,
+  Tab,
+  Box,
+} from "@mui/material";
 
-const NAVIGATION = [
-  {
-    kind: "header",
-    title: "Clearing",
-  },
-  {
-    segment: "dashboard",
-    title: "RTC",
-    icon: <AccountBalanceTwoToneIcon />,
-  },
-  {
-    kind: "divider",
-   },
-  {
-    segment: "EDSDeP",
-    title: "EDSDeP",
-    icon: <ApiTwoToneIcon />,
-  },
-   {
-    kind: "divider",
-   },
-   {
-    segment: "SOSA",
-    title: "SOSA",
-    icon: <ScienceTwoToneIcon />,
-  },
-   {
-    kind: "divider",
-   },
-   {
-    segment: "DDS",
-    title: "DDS",
-    icon: <DeviceHubIcon />,
-  },
-   {
-    kind: "divider",
-   },
-   {
-    segment: "LOPR",
-    title: "LOPR",
-    icon: <DashboardIcon />,
-  },
-   {
-    kind: "divider",
-   },
-    {
-    segment: "KW",
-    title: "Kafka Watcher",
-    icon: <MonitorHeartIcon />,
-  },
-  /*{
-    segment: "orders",
-    title: "Create",
-    icon: <ShoppingCartIcon />,
-  }*/
-  {
-    kind: "divider",
-  },
-  {
-    kind: "header",
-    title: "Environments",
-  },
-  {
-    segment: "NCZ",
-    title: "NCZ",
-    icon: <BarChartIcon />,
-    children: [
-      {
-        segment: "k8s-dev-01-clrg",
-        title: "k8s-dev-01-clrg",
-        icon: <DescriptionIcon />,
-      },
-      {
-        segment: "k8s-dev-01-shared",
-        title: "k8s-dev-01-shared",
-        icon: <DescriptionIcon />,
-      },
-    ],
-  },
-  {
-    segment: "DPZ",
-    title: "DPZ",
-    icon: <LockIcon />,
-    children: [
-      {
-        segment: "k8s-dev-01-clearing",
-        title: "k8s-dev-01-clearing",
-        icon: <DescriptionIcon />,
-      },
-      {
-        segment: "k8s-rat-01-shared",
-        title: "k8s-rat-01-shared",
-        icon: <DescriptionIcon />,
-      },
-    ],
-  },
-];
+export default function IconPositionTabs() {
+  const [tabIndex, setTabIndex] = React.useState(0);
+  const [zone, setZone] = React.useState("");
+  const [cluster, setCluster] = React.useState("");
+  const [teamName, setTeamName] = React.useState("");
+  const [envNumber, setEnvNumber] = React.useState("");
+  const [pillar, setPillar] = React.useState("");
+  const [type, setType] = React.useState("");
+  const [version, setVersion] = React.useState("");
 
-const demoTheme = extendTheme({
-  colorSchemes: { light: true, dark: true },
-  colorSchemeSelector: "class",
-  breakpoints: {
-    values: { xs: 0, sm: 600, md: 600, lg: 1200, xl: 1536 },
-  },
-});
-
-function useDemoRouter(initialPath) {
-  const [pathname, setPathname] = React.useState(initialPath);
-  return {
-    pathname,
-    searchParams: new URLSearchParams(),
-    navigate: (path) => setPathname(String(path)),
+  const clusterOptions = {
+    NCZ: ["DEV", "IN5", "RAT", "SYS"],
+    DPZ: ["RAT", "EXT", "ORT"],
   };
-}
 
-export default function DashboardLayoutBasic(props) {
-  const { window } = props;
-  const router = useDemoRouter("/dashboard");
-  const demoWindow = window ? window() : undefined;
+  const teamNameOptions = {
+    NCZ: { DEV: "cdo", IN5: "cdo", RAT: "cdo", SYS: "cdo" },
+    DPZ: { RAT: "oit", EXT: "oot", ORT: "oot" },
+  };
 
-  const [tickets, setTickets] = React.useState([]);
-  const [loading, setLoading] = React.useState(true);
-  const [selectedTicket, setSelectedTicket] = React.useState(null);
+  const pillarOptions = {
+    NCZ: "clrg",
+    DPZ: "clearing",
+  };
+
+  const autoPopulatedFields = {
+    NCZ: {
+      pipelineName: "reDeploy",
+      accountIdentifier: "Olyndssder",
+      projectIdentifier: "app",
+      orgIdentifier: "pillar",
+      moduleType: "cd",
+      repoIdentifier: "app-deploy-harness-ng",
+      branch: "master",
+      parentEntityConnectorRef: "account.app",
+      parentEntityConnectorRepoName: "app-deploy-harness-ng",
+      getDefaultFromOtherRepo: "true",
+    },
+    DPZ: {
+      pipelineName: "rolling_deploy",
+      accountIdentifier: "Tnsder4",
+      projectIdentifier: "app",
+      orgIdentifier: "pillar_name",
+      moduleType: "cd",
+      repoIdentifier: "app-deploy-harness-ng",
+      branch: "master",
+      parentEntityConnectorRef: "blank",
+      parentEntityConnectorRepoName: "blank",
+      getDefaultFromOtherRepo: "true",
+    },
+  };
 
   React.useEffect(() => {
-    const fetchTickets = async () => {
-      try {
-        const data = await getAllTickets();
-        setTickets(data);
-      } catch (error) {
-        console.error("Failed to fetch tickets:", error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-    if (router.pathname === "/dashboard") fetchTickets();
-  }, [router.pathname]);
+    if (zone && cluster) {
+      setTeamName(teamNameOptions[zone][cluster] || "");
+    }
+  }, [zone, cluster]);
 
-  const columns = [
-    { field: "id", headerName: "ID", width: 150 },
-    { field: "ticketStatus", headerName: "Status", width: 130 },
-    {
-      field: "assignee",
-      headerName: "Assignee",
-      width: 200,
-      valueGetter: (value, row) => {
-        return row.assignee
-          ? `${row.assignee.firstName || ""} ${row.assignee.lastName || ""}`
-          : "Unassigned";
-      },
-    },
-    { field: "createdAt", headerName: "Created At", width: 180 },
-  ];
+  React.useEffect(() => {
+    if (zone) {
+      setPillar(pillarOptions[zone] || "");
+    }
+  }, [zone]);
+
+  const handleTabChange = (event, newIndex) => setTabIndex(newIndex);
+  const handleZoneChange = (event) => {
+    setZone(event.target.value);
+    setCluster("");
+  };
+  const handleClusterChange = (event) => setCluster(event.target.value);
 
   return (
-    <AppProvider
-      navigation={NAVIGATION}
-      router={router}
-      theme={demoTheme}
-      window={demoWindow}
-    >
-      <DashboardLayout>
-        <PageContainer  >
-          <Grid item >
-            {router.pathname === "/dashboard" && (
-              <>
-                <Grid item xs={12} sx={{ width: "100%" }}>
-                  <Paper sx={{ flexGrow: 1, display: "flex", height: "100%", width: "100%", display: "flex", flexDirection: "column"  }}>
-                    <DataGrid
-                      rows={tickets}
-                      columns={columns}
-                      loading={loading}
-                      pageSizeOptions={[5, 10]}
-                      checkboxSelection
-                      onRowClick={(params) => setSelectedTicket(params.row)}
-                      sx={{ flexGrow: 1 }}
-                    />
-                  </Grid>
-                </Grid>
-              </>
-            )}
-          </Grid>
-        </PageContainer>
-      </DashboardLayout>
+    <Box>
+      <Tabs value={tabIndex} onChange={handleTabChange} centered>
+        <Tab label="General" />
+        <Tab label="Environment Variables" />
+        <Tab label="Application Specs" />
+        <Tab label="Kafka Topics" />
+      </Tabs>
 
-      {/* Modal for Ticket Details */}
-      <Modal
-        open={!!selectedTicket}
-        onClose={() => setSelectedTicket(null)}
-        closeAfterTransition
-        BackdropComponent={Backdrop}
-        BackdropProps={{
-          sx: {
-            backgroundColor: "rgba(0, 0, 0, 0.5)", // Dims the background
-            backdropFilter: "blur(5px)", // Blurs the background
-          },
-        }}
-      >
-        <Card
-          sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: 400,
-            boxShadow: 24,
-            p: 4,
-            borderRadius: 2,
-            backgroundColor: "white",
-          }}
-        >
-          {selectedTicket ? (
-            <TicketDetails ticket={selectedTicket} />
-          ) : (
-            <Typography>Select a ticket to view details.</Typography>
-          )}
+      {/* Environment Variables Tab */}
+      {tabIndex === 1 && (
+        <Card sx={{ mt: 5, borderRadius: 5 }}>
+          <CardContent sx={{ p: 5 }}>
+            <h2>Environment Variables</h2>
+            <Grid container spacing={3}>
+              <Grid item xs={12}>
+                <FormControl fullWidth>
+                  <InputLabel>Zone</InputLabel>
+                  <Select value={zone} onChange={handleZoneChange}>
+                    <MenuItem value="NCZ">NCZ</MenuItem>
+                    <MenuItem value="DPZ">DPZ</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              <Grid item xs={12}>
+                <FormControl fullWidth disabled={!zone}>
+                  <InputLabel>Cluster</InputLabel>
+                  <Select value={cluster} onChange={handleClusterChange}>
+                    {zone &&
+                      clusterOptions[zone].map((clusterName) => (
+                        <MenuItem key={clusterName} value={clusterName}>
+                          {clusterName}
+                        </MenuItem>
+                      ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              {/* Auto-Populated & Disabled Fields */}
+              {zone &&
+                Object.entries(autoPopulatedFields[zone]).map(([key, value]) => (
+                  <Grid item xs={12} key={key}>
+                    <TextField label={key} value={value} fullWidth disabled />
+                  </Grid>
+                ))}
+
+              <Grid item xs={12}>
+                <TextField label="Team Name" value={teamName || ""} fullWidth disabled />
+              </Grid>
+
+              <Grid item xs={12}>
+                <TextField label="Pillar" value={pillar || ""} fullWidth disabled />
+              </Grid>
+
+              <Grid item xs={12}>
+                <FormControl fullWidth>
+                  <InputLabel>Environment Number</InputLabel>
+                  <Select value={envNumber} onChange={(e) => setEnvNumber(e.target.value)}>
+                    {[...Array(101).keys()].map((num) => (
+                      <MenuItem key={num} value={num}>
+                        {String(num).padStart(2, "0")}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+            </Grid>
+          </CardContent>
         </Card>
-      </Modal>
-    </AppProvider>
+      )}
+
+      {/* General Tab */}
+      {tabIndex === 0 && (
+        <Card sx={{ mt: 5, borderRadius: 5 }}>
+          <CardContent sx={{ p: 5 }}>
+            <h2>General</h2>
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <TextField value="Requestor Group" fullWidth disabled />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField value="First Name" fullWidth disabled />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField value="Last Name" fullWidth disabled />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField value="User ID" fullWidth disabled />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField value="Email" fullWidth disabled />
+              </Grid>
+            </Grid>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Application Specs Tab */}
+      {tabIndex === 2 && (
+        <Card sx={{ mt: 5, borderRadius: 5 }}>
+          <CardContent sx={{ p: 5 }}>
+            <h2>Application Specs</h2>
+            <Grid container spacing={4}>
+              <Grid item xs={12}>
+                <FormControl fullWidth>
+                  <InputLabel>Type</InputLabel>
+                  <Select value={type} onChange={(e) => setType(e.target.value)}>
+                    <MenuItem value="Feature">Feature</MenuItem>
+                    <MenuItem value="Release">Release</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              <Grid item xs={12}>
+                <FormControl fullWidth>
+                  <InputLabel>Version</InputLabel>
+                  <Select value={version} onChange={(e) => setVersion(e.target.value)}>
+                    <MenuItem value=".56">.56</MenuItem>
+                    <MenuItem value=".59">.59</MenuItem>
+                    <MenuItem value=".60">.60</MenuItem>
+                    <MenuItem value=".61">.61</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+            </Grid>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Kafka Topics Tab */}
+      {tabIndex === 3 && (
+        <Card sx={{ mt: 5, borderRadius: 5 }}>
+          <CardContent sx={{ p: 5 }}>
+            <h2>Kafka Topics</h2>
+            <TextField label="Kafka Topics" fullWidth />
+          </CardContent>
+        </Card>
+      )}
+    </Box>
   );
 }

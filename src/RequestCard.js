@@ -12,8 +12,10 @@ import {
   Select,
   Grid,
   TextField,
-  Button
+  Button,
+  Collapse
 } from "@mui/material";
+
 
 export default function IconPositionTabs() {
   const [tabIndex, setTabIndex] = React.useState(0);
@@ -24,8 +26,9 @@ export default function IconPositionTabs() {
   const [pillar, setPillar] = React.useState("");
   const [type, setType] = React.useState("");
   const [version, setVersion] = React.useState("");
+  const [environmentDefaults, setEnvironmentDefaults] = React.useState({});
 
-  // Define clusters based on zone selection
+
   const clusterOptions = {
     NCZ: ["DEV", "IN5", "RAT", "SYS"],
     DPZ: ["RAT", "EXT", "ORT"],
@@ -42,6 +45,34 @@ export default function IconPositionTabs() {
       RAT: "oit",
       EXT: "oot",
       ORT: "oot",
+    },
+  };
+
+{/* HARNESS INFORMAITON HERE!!!!!!*/}
+    const environmentData = {
+    NCZ: {
+      pipelineName: "reDeploy",
+      accountIdentifier: "Olyndssder",
+      projectIdentifier: "app",
+      orgIdentifier: "pillar",
+      moduleType: "cd",
+      repoIdentifier: "app-deploy-harness-ng",
+      branch: "master",
+      parentEntityConnectorRef: "account.app",
+      parentEntityConnectorRepoName: "app-deploy-harness-ng",
+      getDefaultFromOtherRepo: "true",
+    },
+    DPZ: {
+      pipelineName: "rolling_deploy",
+      accountIdentifier: "Tnsder4",
+      projectIdentifier: "app",
+      orgIdentifier: "pillar_name",
+      moduleType: "cd",
+      repoIdentifier: "app-deploy-harness-ng",
+      branch: "master",
+      parentEntityConnectorRef: "blank",
+      parentEntityConnectorRepoName: "blank",
+      getDefaultFromOtherRepo: "true",
     },
   };
 
@@ -63,7 +94,14 @@ export default function IconPositionTabs() {
     setCluster(event.target.value);
   };
 
-  // Auto-update teamName based on zone and cluster changes
+  React.useEffect(() => {
+    if (zone) {
+      setEnvironmentDefaults(environmentData[zone]);
+    }
+  }, [zone]);
+
+
+
   React.useEffect(() => {
     if (zone && cluster) {
       setTeamName(teamNameOptions[zone][cluster] || "");
@@ -76,24 +114,6 @@ export default function IconPositionTabs() {
     }
   }, [zone]);
 
-   const generateCurlCommand = () => {
-    return `curl --location 'https://ae/api/v1/0100/executions/' \\
---header 'Content-Type: application/json' \\
---header 'Accept: application/json' \\
---header 'Authorization: Basic XXXXXXXXXXXX' \\
---data '{
-  "execution_option": "execute",
-  "inputs": {
-    "zone": "${zone}",
-    "cluster": "${cluster}",
-    "team_name": "${teamName}",
-    "env_number": "${envNumber}",
-    "pillar": "${pillar}",
-    "type": "${type}",
-    "version": "${version}"
-  }
-}'`;
-  };
 
   return (
     <Box>
@@ -105,121 +125,104 @@ export default function IconPositionTabs() {
         <Tab label="Kafka Topics" />
       </Tabs>
 
-      {/* Environment Variables Tab */}
-
 {tabIndex === 1 && (
-  <Card sx={{ mt: 5, borderRadius: 5 }}>
-    <CardContent sx={{ p: 9 }}>
-      <Grid container spacing={4}>
-         {/* cURL Command Box */}
-        <Grid item xs={12} sm={6}>
-          <h2>Inputs</h2>
-          <TextField
-            multiline
-            value={generateCurlCommand()}
-            fullWidth
-            rows={20}
-            variant="standard"
-            sx={{
-              backgroundColor: 'background.default',
-              color: 'text.primary',
-              fontFamily: 'monospace',
-              padding: 2,
-              borderRadius: 1
-            }}
-            InputProps={{
-              readOnly: true,
-            }}
-          />
+  <Card sx={{ mt: 5, borderRadius: 5, width: 'auto', display: 'inline-block' }}>
+    <CardContent sx={{ p: 5, width: 'auto' }}>
+      {/* Center the form if no zone is selected */}
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: zone ? "flex-start" : "center",
+          transition: "justify-content 0.5s ease-in-out", // Smooth transition when zone is selected
+        }}
+      >
+        <Grid container spacing={5} sx={{ justifyContent: 'center'}}>
+          {/* Environment Variables Form */}
+          <Grid item xs={12} md={6}>
+            <h2>Environment Variables</h2>
+            <Grid container spacing={4}>
+              {/* Zone Selection */}
+              <Grid item xs={12}>
+                <FormControl fullWidth>
+                  <InputLabel sx={{ transform: zone ? "translate(14px, -20px) scale(0.75)" : "translate(14px, 12px) scale(1)" }} >Zone</InputLabel>
+                  <Select value={zone} onChange={handleZoneChange}>
+                    <MenuItem value="NCZ">NCZ</MenuItem>
+                    <MenuItem value="DPZ">DPZ</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
 
-        </Grid>
+              {/* Cluster Selection */}
+              <Grid item xs={12}>
+                <FormControl fullWidth disabled={!zone}>
+                  <InputLabel sx={{ transform: cluster ? "translate(14px, -20px) scale(0.75)" : "translate(14px, 12px) scale(1)" }} >Cluster</InputLabel>
+                  <Select value={cluster} onChange={handleClusterChange}>
+                    {zone &&
+                      clusterOptions[zone].map((clusterName) => (
+                        <MenuItem key={clusterName} value={clusterName}>
+                          {clusterName}
+                        </MenuItem>
+                      ))}
+                  </Select>
+                </FormControl>
+              </Grid>
 
+              {/* Team Name */}
+              <Grid item xs={12}>
+                <TextField label="Team Name" value={teamName || ''} fullWidth disabled />
+              </Grid>
 
-        {/* Environment Variables Form */}
-        <Grid item xs={12} sm={6}>
-          <h2>Environment Variables</h2>
-          <Grid container spacing={4}>
-            <Grid item xs={12}>
-              <FormControl fullWidth>
-                <InputLabel sx={{ transform: zone ? "translate(14px, -20px) scale(0.75)" : "translate(14px, 12px) scale(1)" }}>
-                  Zone
-                </InputLabel>
-                <Select value={zone} onChange={handleZoneChange}>
-                  <MenuItem value="NCZ">NCZ</MenuItem>
-                  <MenuItem value="DPZ">DPZ</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
+              {/* Pillar */}
+              <Grid item xs={12}>
+                <TextField label="Pillar" value={pillar || ''} fullWidth disabled />
+              </Grid>
 
-            <Grid item xs={12}>
-              <FormControl fullWidth disabled={!zone}>
-                <InputLabel sx={{ transform: cluster ? "translate(14px, -20px) scale(0.75)" : "translate(14px, 12px) scale(1)" }}>
-                  Cluster
-                </InputLabel>
-                <Select value={cluster} onChange={handleClusterChange}>
-                  {zone &&
-                    clusterOptions[zone].map((clusterName) => (
-                      <MenuItem key={clusterName} value={clusterName}>
-                        {clusterName}
+              {/* Environment Number */}
+              <Grid item xs={12}>
+                <FormControl fullWidth>
+                  <InputLabel sx={{ transform: envNumber ? "translate(14px, -20px) scale(0.75)" : "translate(14px, 12px) scale(1)" }} >Environment Number</InputLabel>
+                  <Select value={envNumber} onChange={(e) => setEnvNumber(e.target.value)}>
+                    {[...Array(101).keys()].map((num) => (
+                      <MenuItem key={num} value={num}>
+                        {String(num).padStart(2, '0')}
                       </MenuItem>
                     ))}
-                </Select>
-              </FormControl>
-            </Grid>
-
-            <Grid item xs={12}>
-              <TextField
-                label="Team Name"
-                value={teamName || ''}
-                fullWidth
-                disabled
-              />
-            </Grid>
-
-            <Grid item xs={12}>
-              <TextField
-                label="Pillar"
-                value={pillar || ''}
-                fullWidth
-                disabled
-              />
-            </Grid>
-
-            <Grid item xs={12}>
-              <FormControl fullWidth>
-                <InputLabel sx={{ transform: envNumber ? "translate(14px, -20px) scale(0.75)" : "translate(14px, 12px) scale(1)" }}>
-                  Environment Number
-                </InputLabel>
-                <Select value={envNumber} onChange={(e) => setEnvNumber(e.target.value)}>
-                  {[...Array(101).keys()].map((num) => (
-                    <MenuItem key={num} value={num}>
-                      {String(num).padStart(2, '0')}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+                  </Select>
+                </FormControl>
+              </Grid>
             </Grid>
           </Grid>
-        </Grid>
-      </Grid>
 
+          {/* Environment Defaults - Hidden Until Zone is Selected */}
+          <Grid item xs={12} md={6}>
+            <Collapse in={Boolean(zone)} timeout={900}>
+              <h2>Environment Defaults</h2>
+              <Grid container spacing={2}>
+                {Object.entries(environmentDefaults).map(([key, value]) => (
+                  <Grid item xs={12} key={key}>
+                    <TextField label={key} value={value} fullWidth disabled />
+                  </Grid>
+                ))}
+              </Grid>
+            </Collapse>
+          </Grid>
+        </Grid>
+      </Box>
+
+      {/* Navigation Buttons */}
       <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 3 }}>
-        <Button
-          variant="contained"
-          onClick={() => setTabIndex(0)}
-          disabled={tabIndex === 0}>
+        <Button variant="contained" onClick={() => setTabIndex(0)} disabled={tabIndex === 0}>
           Back
         </Button>
-        <Button
-          variant="contained"
-          onClick={() => setTabIndex(2)}
-          disabled={tabIndex === 2}>
+        <Button variant="contained" onClick={() => setTabIndex(2)} disabled={tabIndex === 2}>
           Next
         </Button>
       </Box>
     </CardContent>
   </Card>
 )}
+
+
 
 
       {/* General Tab */}
