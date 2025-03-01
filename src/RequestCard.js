@@ -196,7 +196,7 @@ export default function IconPositionTabs() {
           {/* Environment Defaults - Hidden Until Zone is Selected */}
           <Grid item xs={12} md={6}>
             <Collapse in={Boolean(zone)} timeout={900}>
-              <h2>Environment Defaults</h2>
+              <h2>Harness Defaults</h2>
               <Grid container spacing={2}>
                 {Object.entries(environmentDefaults).map(([key, value]) => (
                   <Grid item xs={12} key={key}>
