@@ -1,8 +1,11 @@
 import * as React from 'react';
+import { useState, useEffect } from "react";
+import axios from "axios";
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
+import postData from './ApiService';
 import {
   Card,
   CardContent,
@@ -27,6 +30,8 @@ export default function IconPositionTabs() {
   const [type, setType] = React.useState("");
   const [version, setVersion] = React.useState("");
   const [environmentDefaults, setEnvironmentDefaults] = React.useState({});
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
 
   const clusterOptions = {
@@ -48,33 +53,32 @@ export default function IconPositionTabs() {
     },
   };
 
-{/* HARNESS INFORMAITON HERE!!!!!!*/}
-    const environmentData = {
-    NCZ: {
-      pipelineName: "reDeploy",
-      accountIdentifier: "Olyndssder",
-      projectIdentifier: "app",
-      orgIdentifier: "pillar",
-      moduleType: "cd",
-      repoIdentifier: "app-deploy-harness-ng",
-      branch: "master",
-      parentEntityConnectorRef: "account.app",
-      parentEntityConnectorRepoName: "app-deploy-harness-ng",
-      getDefaultFromOtherRepo: "true",
-    },
-    DPZ: {
-      pipelineName: "rolling_deploy",
-      accountIdentifier: "Tnsder4",
-      projectIdentifier: "app",
-      orgIdentifier: "pillar_name",
-      moduleType: "cd",
-      repoIdentifier: "app-deploy-harness-ng",
-      branch: "master",
-      parentEntityConnectorRef: "blank",
-      parentEntityConnectorRepoName: "blank",
-      getDefaultFromOtherRepo: "true",
-    },
-  };
+
+
+
+  useEffect(() => {
+    if (!zone) return;
+
+    const fetchData = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const data = await postData(zone);
+        console.log('Fetched data:', data);
+        setEnvironmentDefaults(data); // Update environmentDefaults with the fetched data
+      } catch (err) {
+        setError("Failed to fetch data");
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [zone]);
+
+
 
   const pillarOptions = {
     NCZ: "clrg",
@@ -93,13 +97,6 @@ export default function IconPositionTabs() {
   const handleClusterChange = (event) => {
     setCluster(event.target.value);
   };
-
-  React.useEffect(() => {
-    if (zone) {
-      setEnvironmentDefaults(environmentData[zone]);
-    }
-  }, [zone]);
-
 
 
 
