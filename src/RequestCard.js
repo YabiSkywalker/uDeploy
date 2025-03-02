@@ -102,6 +102,8 @@ export default function IconPositionTabs() {
 
 
 
+
+
   React.useEffect(() => {
     if (zone && cluster) {
       setTeamName(teamNameOptions[zone][cluster] || "");
@@ -155,7 +157,7 @@ export default function IconPositionTabs() {
               {/* Cluster Selection */}
               <Grid item xs={12}>
                 <FormControl fullWidth disabled={!zone}>
-                  <InputLabel sx={{ transform: cluster ? "translate(14px, -20px) scale(0.75)" : "translate(14px, 12px) scale(1)" }} >Cluster</InputLabel>
+                  <InputLabel sx={{ transform: cluster ? "translate(14px, -20px) scale(0.75)" : "translate(14px, 12px) scale(1)" }} >Environment Type</InputLabel>
                   <Select value={cluster} onChange={handleClusterChange}>
                     {zone &&
                       clusterOptions[zone].map((clusterName) => (
@@ -221,6 +223,9 @@ export default function IconPositionTabs() {
     </CardContent>
   </Card>
 )}
+
+
+
 
 
 

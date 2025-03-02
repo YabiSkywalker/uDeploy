@@ -1,229 +1,225 @@
 import * as React from "react";
-import {
-  Card,
-  CardContent,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
-  Grid,
-  TextField,
-  Button,
-  Tabs,
-  Tab,
-  Box,
-} from "@mui/material";
+import { extendTheme, styled } from "@mui/material/styles";
+import DashboardIcon from "@mui/icons-material/Dashboard";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import BarChartIcon from "@mui/icons-material/BarChart";
+import DescriptionIcon from "@mui/icons-material/Description";
+import LayersIcon from "@mui/icons-material/Layers";
+import { AppProvider } from "@toolpad/core/AppProvider";
+import { DashboardLayout } from "@toolpad/core/DashboardLayout";
+import { PageContainer } from "@toolpad/core/PageContainer";
+import Grid from "@mui/material/Grid";
+import { getAllTickets } from "./authService";
+import TicketDetails from "./TicketDetails";
+import { Card, CardContent, Typography, Modal, Backdrop } from "@mui/material";
+import Paper from "@mui/material/Paper";
+import { DataGrid } from "@mui/x-data-grid";
+import ApiTwoToneIcon from '@mui/icons-material/ApiTwoTone';
+import ScienceTwoToneIcon from '@mui/icons-material/ScienceTwoTone';
+import AccountBalanceTwoToneIcon from '@mui/icons-material/AccountBalanceTwoTone';
+import MonitorHeartIcon from '@mui/icons-material/MonitorHeart';
+import DeviceHubIcon from '@mui/icons-material/DeviceHub';
+import LockIcon from '@mui/icons-material/Lock';
+import IconPositionTabs from './RequestCard';
+import { Box, List, ListItem, ListItemIcon, ListItemText, Divider } from "@mui/material";
 
-export default function IconPositionTabs() {
-  const [tabIndex, setTabIndex] = React.useState(0);
-  const [zone, setZone] = React.useState("");
-  const [cluster, setCluster] = React.useState("");
-  const [teamName, setTeamName] = React.useState("");
-  const [envNumber, setEnvNumber] = React.useState("");
-  const [pillar, setPillar] = React.useState("");
-  const [type, setType] = React.useState("");
-  const [version, setVersion] = React.useState("");
 
-  const clusterOptions = {
-    NCZ: ["DEV", "IN5", "RAT", "SYS"],
-    DPZ: ["RAT", "EXT", "ORT"],
+const NAVIGATION = [
+  {
+    kind: "header",
+    title: "Clearing",
+  },
+  {
+    segment: "RTC",
+    title: "RTC",
+    icon: <AccountBalanceTwoToneIcon />,
+  },
+  {
+    kind: "divider",
+  },
+  {
+    segment: "EDSDeP",
+    title: "EDSDeP",
+    icon: <ApiTwoToneIcon />,
+    disabled: true,
+  },
+  {
+    kind: "divider",
+  },
+  {
+    segment: "SOSA",
+    title: "SOSA",
+    icon: <ScienceTwoToneIcon />,
+    disabled: true,
+  },
+  {
+    kind: "divider",
+  },
+  {
+    segment: "DDS",
+    title: "DDS",
+    icon: <DeviceHubIcon />,
+    disabled: true,
+  },
+  {
+    kind: "divider",
+  },
+  {
+    segment: "LOPR",
+    title: "LOPR",
+    icon: <DashboardIcon />,
+    disabled: true,
+  },
+  {
+    kind: "divider",
+  },
+  {
+    segment: "KW",
+    title: "Kafka Watcher",
+    icon: <MonitorHeartIcon />,
+    disabled: true,
+  },
+  {
+    kind: "divider",
+  },
+  {
+    kind: "header",
+    title: "Environments",
+  },
+  {
+    segment: "NCZ",
+    title: "NCZ",
+    icon: <BarChartIcon />,
+    children: [
+      {
+        segment: "k8s-dev-01-clrg",
+        title: "k8s-dev-01-clrg",
+        icon: <DescriptionIcon />,
+      },
+      {
+        segment: "k8s-dev-01-shared",
+        title: "k8s-dev-01-shared",
+        icon: <DescriptionIcon />,
+      },
+    ],
+  },
+  {
+    segment: "DPZ",
+    title: "DPZ",
+    icon: <LockIcon />,
+    children: [
+      {
+        segment: "k8s-dev-01-clearing",
+        title: "k8s-dev-01-clearing",
+        icon: <DescriptionIcon />,
+      },
+      {
+        segment: "k8s-rat-01-shared",
+        title: "k8s-rat-01-shared",
+        icon: <DescriptionIcon />,
+      },
+    ],
+  },
+];
+
+// Fix: Ensure disabled logic works properly
+const updatedNavigation = NAVIGATION.map((segment) => ({
+  ...segment,
+  disabled: segment.disabled || false,
+  sx: segment.disabled
+    ? { opacity: 0.5, pointerEvents: "none", cursor: "not-allowed" }
+    : {},
+  children: segment.children
+    ? segment.children.map((child) => ({
+        ...child,
+        disabled: child.disabled || false,
+        sx: child.disabled
+          ? { opacity: 0.5, pointerEvents: "none", cursor: "not-allowed" }
+          : {},
+      }))
+    : undefined,
+}));
+
+const demoTheme = extendTheme({
+  colorSchemes: { light: true, dark: true },
+  colorSchemeSelector: "class",
+  breakpoints: {
+    values: { xs: 0, sm: 600, md: 600, lg: 1200, xl: 1536 },
+  },
+});
+
+// Custom hook to handle routing
+function useDemoRouter(initialPath) {
+  const [pathname, setPathname] = React.useState(initialPath);
+  return {
+    pathname,
+    searchParams: new URLSearchParams(),
+    navigate: (path) => setPathname(String(path)),
   };
+}
 
-  const teamNameOptions = {
-    NCZ: { DEV: "cdo", IN5: "cdo", RAT: "cdo", SYS: "cdo" },
-    DPZ: { RAT: "oit", EXT: "oot", ORT: "oot" },
-  };
-
-  const pillarOptions = {
-    NCZ: "clrg",
-    DPZ: "clearing",
-  };
-
-  const autoPopulatedFields = {
-    NCZ: {
-      pipelineName: "reDeploy",
-      accountIdentifier: "Olyndssder",
-      projectIdentifier: "app",
-      orgIdentifier: "pillar",
-      moduleType: "cd",
-      repoIdentifier: "app-deploy-harness-ng",
-      branch: "master",
-      parentEntityConnectorRef: "account.app",
-      parentEntityConnectorRepoName: "app-deploy-harness-ng",
-      getDefaultFromOtherRepo: "true",
-    },
-    DPZ: {
-      pipelineName: "rolling_deploy",
-      accountIdentifier: "Tnsder4",
-      projectIdentifier: "app",
-      orgIdentifier: "pillar_name",
-      moduleType: "cd",
-      repoIdentifier: "app-deploy-harness-ng",
-      branch: "master",
-      parentEntityConnectorRef: "blank",
-      parentEntityConnectorRepoName: "blank",
-      getDefaultFromOtherRepo: "true",
-    },
-  };
-
-  React.useEffect(() => {
-    if (zone && cluster) {
-      setTeamName(teamNameOptions[zone][cluster] || "");
-    }
-  }, [zone, cluster]);
-
-  React.useEffect(() => {
-    if (zone) {
-      setPillar(pillarOptions[zone] || "");
-    }
-  }, [zone]);
-
-  const handleTabChange = (event, newIndex) => setTabIndex(newIndex);
-  const handleZoneChange = (event) => {
-    setZone(event.target.value);
-    setCluster("");
-  };
-  const handleClusterChange = (event) => setCluster(event.target.value);
+export default function DashboardLayoutBasic(props) {
+  const { window } = props;
+  const router = useDemoRouter("/RTC");
+  const demoWindow = window ? window() : undefined;
 
   return (
-    <Box>
-      <Tabs value={tabIndex} onChange={handleTabChange} centered>
-        <Tab label="General" />
-        <Tab label="Environment Variables" />
-        <Tab label="Application Specs" />
-        <Tab label="Kafka Topics" />
-      </Tabs>
+    <AppProvider
+      branding={{ title: 'uDeploy' }}
+      navigation={updatedNavigation} // Correct prop for updated navigation
+      router={router}
+      theme={demoTheme}
+      window={demoWindow}
+    >
+      <DashboardLayout>
+        {router.pathname === "/RTC" && (
+          <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", p: 1 }}>
+            <Paper sx={{ p: 3 }}> {/* Correct usage of Paper */}
+              <IconPositionTabs />
+            </Paper>
+          </Box>
+        )}
+      </DashboardLayout>
+    </AppProvider>
+  );
+}
 
-      {/* Environment Variables Tab */}
-      {tabIndex === 1 && (
-        <Card sx={{ mt: 5, borderRadius: 5 }}>
-          <CardContent sx={{ p: 5 }}>
-            <h2>Environment Variables</h2>
-            <Grid container spacing={3}>
-              <Grid item xs={12}>
-                <FormControl fullWidth>
-                  <InputLabel>Zone</InputLabel>
-                  <Select value={zone} onChange={handleZoneChange}>
-                    <MenuItem value="NCZ">NCZ</MenuItem>
-                    <MenuItem value="DPZ">DPZ</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
 
-              <Grid item xs={12}>
-                <FormControl fullWidth disabled={!zone}>
-                  <InputLabel>Cluster</InputLabel>
-                  <Select value={cluster} onChange={handleClusterChange}>
-                    {zone &&
-                      clusterOptions[zone].map((clusterName) => (
-                        <MenuItem key={clusterName} value={clusterName}>
-                          {clusterName}
-                        </MenuItem>
-                      ))}
-                  </Select>
-                </FormControl>
-              </Grid>
 
-              {/* Auto-Populated & Disabled Fields */}
-              {zone &&
-                Object.entries(autoPopulatedFields[zone]).map(([key, value]) => (
+
+
+        <Grid container spacing={5} sx={{ justifyContent: 'center'}}>
+          {/* Environment Variables Form */}
+          <Grid item xs={12} md={6}>
+
+
+          </Grid>
+
+          {/* Environment Defaults - Hidden Until Zone is Selected */}
+          <Grid item xs={12} md={6}>
+            <Collapse in={Boolean(zone)} timeout={900}>
+              <h2>Harness Defaults</h2>
+              <Grid container spacing={2}>
+                {Object.entries(environmentDefaults).map(([key, value]) => (
                   <Grid item xs={12} key={key}>
                     <TextField label={key} value={value} fullWidth disabled />
                   </Grid>
                 ))}
+              </Grid>
+            </Collapse>
+          </Grid>
+        </Grid>
 
-              <Grid item xs={12}>
-                <TextField label="Team Name" value={teamName || ""} fullWidth disabled />
-              </Grid>
 
-              <Grid item xs={12}>
-                <TextField label="Pillar" value={pillar || ""} fullWidth disabled />
-              </Grid>
 
-              <Grid item xs={12}>
-                <FormControl fullWidth>
-                  <InputLabel>Environment Number</InputLabel>
-                  <Select value={envNumber} onChange={(e) => setEnvNumber(e.target.value)}>
-                    {[...Array(101).keys()].map((num) => (
-                      <MenuItem key={num} value={num}>
-                        {String(num).padStart(2, "0")}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-            </Grid>
-          </CardContent>
-        </Card>
-      )}
 
-      {/* General Tab */}
-      {tabIndex === 0 && (
-        <Card sx={{ mt: 5, borderRadius: 5 }}>
-          <CardContent sx={{ p: 5 }}>
-            <h2>General</h2>
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <TextField value="Requestor Group" fullWidth disabled />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField value="First Name" fullWidth disabled />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField value="Last Name" fullWidth disabled />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField value="User ID" fullWidth disabled />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField value="Email" fullWidth disabled />
-              </Grid>
-            </Grid>
-          </CardContent>
-        </Card>
-      )}
 
-      {/* Application Specs Tab */}
-      {tabIndex === 2 && (
-        <Card sx={{ mt: 5, borderRadius: 5 }}>
-          <CardContent sx={{ p: 5 }}>
-            <h2>Application Specs</h2>
-            <Grid container spacing={4}>
-              <Grid item xs={12}>
-                <FormControl fullWidth>
-                  <InputLabel>Type</InputLabel>
-                  <Select value={type} onChange={(e) => setType(e.target.value)}>
-                    <MenuItem value="Feature">Feature</MenuItem>
-                    <MenuItem value="Release">Release</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
 
-              <Grid item xs={12}>
-                <FormControl fullWidth>
-                  <InputLabel>Version</InputLabel>
-                  <Select value={version} onChange={(e) => setVersion(e.target.value)}>
-                    <MenuItem value=".56">.56</MenuItem>
-                    <MenuItem value=".59">.59</MenuItem>
-                    <MenuItem value=".60">.60</MenuItem>
-                    <MenuItem value=".61">.61</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-            </Grid>
-          </CardContent>
-        </Card>
-      )}
 
-      {/* Kafka Topics Tab */}
-      {tabIndex === 3 && (
-        <Card sx={{ mt: 5, borderRadius: 5 }}>
-          <CardContent sx={{ p: 5 }}>
-            <h2>Kafka Topics</h2>
-            <TextField label="Kafka Topics" fullWidth />
-          </CardContent>
-        </Card>
-      )}
-    </Box>
-  );
-}
+
+
+
+
+
+
+

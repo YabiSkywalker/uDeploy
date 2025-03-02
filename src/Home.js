@@ -21,7 +21,7 @@ import MonitorHeartIcon from '@mui/icons-material/MonitorHeart';
 import DeviceHubIcon from '@mui/icons-material/DeviceHub';
 import LockIcon from '@mui/icons-material/Lock';
 import IconPositionTabs from './RequestCard';
-import { Box } from "@mui/material";
+import { Box, List, ListItem, ListItemIcon, ListItemText, Divider } from "@mui/material";
 
 
 const NAVIGATION = [
@@ -41,6 +41,7 @@ const NAVIGATION = [
     segment: "EDSDeP",
     title: "EDSDeP",
     icon: <ApiTwoToneIcon />,
+    disabled: true,
   },
    {
     kind: "divider",
@@ -49,6 +50,7 @@ const NAVIGATION = [
     segment: "SOSA",
     title: "SOSA",
     icon: <ScienceTwoToneIcon />,
+    disabled: true,
   },
    {
     kind: "divider",
@@ -57,6 +59,7 @@ const NAVIGATION = [
     segment: "DDS",
     title: "DDS",
     icon: <DeviceHubIcon />,
+    disabled: true,
   },
    {
     kind: "divider",
@@ -65,6 +68,7 @@ const NAVIGATION = [
     segment: "LOPR",
     title: "LOPR",
     icon: <DashboardIcon />,
+    disabled: true,
   },
    {
     kind: "divider",
@@ -73,6 +77,7 @@ const NAVIGATION = [
     segment: "KW",
     title: "Kafka Watcher",
     icon: <MonitorHeartIcon />,
+    disabled: true,
   },
   /*{
     segment: "orders",
@@ -122,6 +127,25 @@ const NAVIGATION = [
   },
 ];
 
+
+const updatedNavigation = NAVIGATION.map((segment) => ({
+  ...segment,
+  disabled: segment.segment || false, // Ensure disabled is always defined
+  sx: segment.disabled
+    ? { opacity: 0.5, pointerEvents: "none", cursor: "not-allowed" }
+    : {},
+  children: segment.children
+    ? segment.children.map((child) => ({
+        ...child,
+        disabled: child.disabled || false,
+        sx: child.disabled
+          ? { opacity: 0.5, pointerEvents: "none", cursor: "not-allowed" }
+          : {},
+      }))
+    : undefined,
+}));
+
+
 const demoTheme = extendTheme({
   colorSchemes: { light: true, dark: true },
   colorSchemeSelector: "class",
@@ -139,22 +163,22 @@ function useDemoRouter(initialPath) {
   };
 }
 
-export default function DashboardLayoutBasic(props) {
+
+
+
+
+export default function DashboardLayoutBasic(navigation, ...props) {
   const { window } = props;
   const router = useDemoRouter("/RTC");
   const demoWindow = window ? window() : undefined;
   const [loading, setLoading] = React.useState(true);
 
 
-
-
-
-
   return (
     <AppProvider
       branding={{
     title: 'uDeploy'}}
-      navigation={NAVIGATION}
+      navigation={updatedNavigation}
       router={router}
       theme={demoTheme}
       window={demoWindow}
@@ -171,3 +195,4 @@ export default function DashboardLayoutBasic(props) {
     </AppProvider>
   );
 }
+
