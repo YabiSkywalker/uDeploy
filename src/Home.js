@@ -22,7 +22,7 @@ import DeviceHubIcon from '@mui/icons-material/DeviceHub';
 import LockIcon from '@mui/icons-material/Lock';
 import IconPositionTabs from './RequestCard';
 import { Box, List, ListItem, ListItemIcon, ListItemText, Divider } from "@mui/material";
-
+import { Link } from "react-router-dom";
 
 const NAVIGATION = [
   {
@@ -128,22 +128,7 @@ const NAVIGATION = [
 ];
 
 
-const updatedNavigation = NAVIGATION.map((segment) => ({
-  ...segment,
-  disabled: segment.segment || false, // Ensure disabled is always defined
-  sx: segment.disabled
-    ? { opacity: 0.5, pointerEvents: "none", cursor: "not-allowed" }
-    : {},
-  children: segment.children
-    ? segment.children.map((child) => ({
-        ...child,
-        disabled: child.disabled || false,
-        sx: child.disabled
-          ? { opacity: 0.5, pointerEvents: "none", cursor: "not-allowed" }
-          : {},
-      }))
-    : undefined,
-}));
+
 
 
 const demoTheme = extendTheme({
@@ -167,9 +152,9 @@ function useDemoRouter(initialPath) {
 
 
 
-export default function DashboardLayoutBasic(navigation, ...props) {
+export default function DashboardLayoutBasic(props) {
   const { window } = props;
-  const router = useDemoRouter("/RTC");
+  const router = useDemoRouter("/home");
   const demoWindow = window ? window() : undefined;
   const [loading, setLoading] = React.useState(true);
 
@@ -177,8 +162,8 @@ export default function DashboardLayoutBasic(navigation, ...props) {
   return (
     <AppProvider
       branding={{
-    title: 'uDeploy'}}
-      navigation={updatedNavigation}
+      title: 'uDeploy'}}
+      navigation={NAVIGATION}
       router={router}
       theme={demoTheme}
       window={demoWindow}
@@ -188,9 +173,20 @@ export default function DashboardLayoutBasic(navigation, ...props) {
                 <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", p: 1}} >
                     <paper sx={{ p: 3 }}>
                         <IconPositionTabs />
+
                     </paper>
                 </Box>
             )}
+
+            {router.pathname === "/uDeploy" && (
+                <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", p: 1 }}>
+                    <Paper sx={{ p: 3 }}>
+                        <Typography variant="h4">Welcome to uDeploy</Typography>
+                    {/* Add any other homepage content */}
+                    </Paper>
+                </Box>
+            )}
+
       </DashboardLayout>
     </AppProvider>
   );
